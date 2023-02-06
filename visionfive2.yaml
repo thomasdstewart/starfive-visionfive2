@@ -1,0 +1,141 @@
+---
+steps:
+  - mkimg: "{{ output }}"
+    size: 1000M
+
+  - mklabel: gpt
+    device: "{{ output }}"
+
+  - mkpart: spl
+    device: "{{ output }}"
+    start: 2MiB
+    end: 4MiB
+    tag: spl
+
+  - mkpart: uboot
+    device: "{{ output }}"
+    start: 4MiB
+    end: 8MiB
+    tag: uboot
+
+  - mkpart: boot
+    fs-type: 'fat32'
+    device: "{{ output }}"
+    start: 8MiB
+    end: 128MiB
+    tag: boot
+
+  - set_part_flag: "{{ output }}"
+    flag: boot
+    tag: boot
+
+  - mkpart: root
+    device: "{{ output }}"
+    start: 128MiB
+    end: 100%
+    tag: root
+
+  - kpartx: "{{ output }}"
+
+  - mkfs: vfat
+    partition: boot
+    label: boot
+
+  - mkfs: ext4
+    partition: root
+    label: root
+
+  - mount: root
+
+  - mount: boot
+    mount-on: root
+    dirname: '/boot'
+
+  - qemu-debootstrap: sid
+    target: root
+    mirror: http://deb.debian.org/debian-ports
+    keyring: /usr/share/keyrings/debian-ports-archive-keyring.gpg
+    arch: riscv64
+
+  - fstab: root
+
+  - apt: install
+    tag: root
+    packages:
+      - debian-ports-archive-keyring
+      - initramfs-tools
+      - mtd-utils
+      - ssh
+      - systemd-timesyncd
+      - u-boot-menu
+      - wget
+
+  - create-file: /etc/apt/sources.list
+    contents: |
+      deb http://deb.debian.org/debian-ports sid main
+
+  - create-file: /boot/uEnv.txt
+    contents: |
+      kernel_comp_addr_r=0x90000000
+      kernel_comp_size=0x10000000
+      
+  - chroot: root
+    shell: |
+      mkdir /boot/fw /boot/dtbs
+      cd /boot/fw
+      wget https://github.com/starfive-tech/VisionFive2/releases/download/VF2_v2.8.0/u-boot-spl.bin.normal.out
+      wget https://github.com/starfive-tech/VisionFive2/releases/download/VF2_v2.8.0/visionfive2_fw_payload.img
+
+      wget https://raw.githubusercontent.com/thomasdstewart/starfive-visionfive2/main/linux-image-5.15.0-custom-dirty_5.15.0-custom-dirty-1_riscv64.deb
+      apt-get install ./linux-image-5.15.0-custom-dirty_5.15.0-custom-dirty-1_riscv64.deb
+      rm linux-image-5.15.0-custom-dirty_5.15.0-custom-dirty-1_riscv64.deb
+      cp /usr/lib/linux-image-5.15.0-custom-dirty/starfive/jh7110-visionfive-v2.dtb /boot/dtbs
+
+      echo "U_BOOT_PARAMETERS=\"rw quiet console=ttyS0,115200 earlycon rootwait\"" >> /etc/default/u-boot
+      echo "U_BOOT_ROOT=\"root=LABEL=root\""                                       >> /etc/default/u-boot
+      echo "U_BOOT_FDT=\"dtbs/jh7110-visionfive-v2.dtb\""                          >> /etc/default/u-boot
+      u-boot-update
+
+  - chroot: root
+    shell: |
+      echo "visionfive2" > /etc/hostname
+      echo "nameserver 8.8.8.8" > /etc/resolv.conf
+
+  - create-file: /etc/network/interfaces.d/end0
+    contents: |
+      allow-hotplug end0
+      iface end0 inet dhcp
+
+  - create-file: /etc/network/interfaces.d/end1
+    contents: |
+      allow-hotplug end1
+      iface end1 inet dhcp
+
+  - create-file: /etc/systemd/system/generate-ssh-host-keys.service
+    contents: |
+      [Unit]
+      Description=Generate SSH host keys
+      ConditionPathExistsGlob=!/etc/ssh/ssh_host_*_key
+
+      [Service]
+      Type=oneshot
+      ExecStart=/usr/sbin/dpkg-reconfigure -fnoninteractive openssh-server
+
+      [Install]
+      RequiredBy=multi-user.target
+
+  - chroot: root
+    shell: |
+      systemctl enable generate-ssh-host-keys.service
+
+  - chroot: root
+    shell: |
+      echo "starfive\nstarfive\n" | passwd root
+      echo "starfive\nstarfive\n" | adduser --comment user user
+
+  - chroot: root
+    shell: |
+      rm -rf /var/lib/apt/lists
+      rm -f /etc/machine-id /var/lib/dbus/machine-id
+      rm -f /etc/ssh/ssh_host_*_key*
+
