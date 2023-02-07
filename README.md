@@ -1,7 +1,10 @@
-# linux-starfive image building
-This is a quick way to build a sd card image for a Starfive Visionfive 2 board. The idea it to keep it as simple as possible. It uses vmdb2 to build an image from vanilla Debian, eg you can be sure of provenance, rather than getting an image from a random google drive. Details on the build can be seen in visionfive2.yaml. 
+# Starfive Visionfive2 Debian Image builder
+
+This is a quick way to build a sd card image for a Starfive Visionfive 2 board. The idea it to keep it as simple as possible. It uses vmdb2 to build an image from vanilla Debian, eg you can be sure of provenance, rather than getting an image from a random google drive. Details on the build can be seen in visionfive2.yaml. Obviously because of this some of the hardware might not function, but serial console and ethernet works which fill my usecase.
 
 It assumes that the board already has opensbi and u-boot on the SPI storage and the board is configured to boot from SPI with vanilla settings. However copies from https://github.com/starfive-tech/VisionFive2 are stored in /boot/fw to allow updating: "cd /boot; flashcp -v u-boot-spl.bin.normal.out /dev/mtd0; flashcp -v visionfive2_fw_payload.img  /dev/mtd1". The kernel is from https://github.com/starfive-tech/linux/ and is compiled with starfive instructions using the deb-pkg to create a deb, the resultant kernel deb is in this repo and is installed during the vmdb2 run. This was done with: "git clone git@github.com:starfive-tech/linux.git -b JH7110_VisionFive2_devel; cd linux; make ARCH=riscv CROSS_COMPILE=riscv64-linux-gnu- starfive_jh7110_defconfig; make ARCH=riscv CROSS_COMPILE=riscv64-linux-gnu- LOCALVERSION=-custom deb-pkg".
+
+There is a little but or work I did to try to do this in a container to allow auto building in actions, however this does not work yet, see: Dockerfile and build.sh.
 
 A sample run looks like:
 ```
@@ -54,6 +57,10 @@ Exec: ['kpartx', '-dsv', 'visionfive2.img']
 Exec: ['losetup', '--json', '-l', '/dev/loop0']
 All went fine.
 ~/src/starfive-visionfive2 $
+```
+
+The resultant img can then be copied to an sd card
+```
 ~/src/starfive-visionfive2 $ ls -la visionfive2.img 
 -rw-r--r-- 1 root root 1000M Feb  7 10:05 visionfive2.img
 ~/src/starfive-visionfive2 $
