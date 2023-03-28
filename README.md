@@ -10,6 +10,8 @@ flashcp -v u-boot-spl.bin.normal.out /dev/mtd0
 flashcp -v visionfive2_fw_payload.img  /dev/mtd1
 ```
 
+The move from v2.10.4 to v2.11.5 where mtd0 increased in size required me to perform firmware update in uboot via sftp following https://doc-en.rvspace.org/VisionFive2/Quick_Start_Guide/VisionFive2_SDK_QSG/updating_spl_and_u_boot%20-%20vf2.html
+
 The kernel is from https://github.com/starfive-tech/linux/ and is compiled on 28th March 2023 (https://github.com/starfive-tech/linux/tree/a87c6861c6d96621026ee53b94f081a1a00a4cc7 tag: VF2_v2.11.5) with starfive instructions using the deb-pkg to create a deb, the resultant kernel deb is in this repo and is installed during the vmdb2 run. This was done with:
 
 ```
