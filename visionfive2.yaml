@@ -83,8 +83,8 @@ steps:
     shell: |
       mkdir /boot/fw /boot/dtbs
       cd /boot/fw
-      wget https://github.com/starfive-tech/VisionFive2/releases/download/VF2_v2.8.0/u-boot-spl.bin.normal.out
-      wget https://github.com/starfive-tech/VisionFive2/releases/download/VF2_v2.8.0/visionfive2_fw_payload.img
+      wget https://github.com/starfive-tech/VisionFive2/releases/download/VF2_v2.11.5/u-boot-spl.bin.normal.out
+      wget https://github.com/starfive-tech/VisionFive2/releases/download/VF2_v2.11.5/visionfive2_fw_payload.img
 
       wget https://raw.githubusercontent.com/thomasdstewart/starfive-visionfive2/main/linux-image-5.15.0-custom-dirty_5.15.0-custom-dirty-1_riscv64.deb
       apt-get install ./linux-image-5.15.0-custom-dirty_5.15.0-custom-dirty-1_riscv64.deb
