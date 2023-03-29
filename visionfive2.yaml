@@ -86,10 +86,10 @@ steps:
       wget https://github.com/starfive-tech/VisionFive2/releases/download/VF2_v2.11.5/u-boot-spl.bin.normal.out
       wget https://github.com/starfive-tech/VisionFive2/releases/download/VF2_v2.11.5/visionfive2_fw_payload.img
 
-      wget https://raw.githubusercontent.com/thomasdstewart/starfive-visionfive2/main/linux-image-5.15.0-custom-dirty_5.15.0-custom-dirty-1_riscv64.deb
-      apt-get install ./linux-image-5.15.0-custom-dirty_5.15.0-custom-dirty-1_riscv64.deb
-      rm linux-image-5.15.0-custom-dirty_5.15.0-custom-dirty-1_riscv64.deb
-      cp /usr/lib/linux-image-5.15.0-custom-dirty/starfive/jh7110-visionfive-v2.dtb /boot/dtbs
+      wget https://raw.githubusercontent.com/thomasdstewart/starfive-visionfive2/main/linux-image-5.15.0-custom_5.15.0-custom-1_riscv64.deb
+      apt-get install ./linux-image-5.15.0-custom_5.15.0-custom-1_riscv64.deb
+      rm linux-image-5.15.0-custom_5.15.0-custom-1_riscv64.deb
+      cp /usr/lib/linux-image-5.15.0-custom/starfive/jh7110-visionfive-v2.dtb /boot/dtbs
 
       echo "U_BOOT_PARAMETERS=\"rw quiet console=ttyS0,115200 earlycon rootwait\"" >> /etc/default/u-boot
       echo "U_BOOT_ROOT=\"root=LABEL=root\""                                       >> /etc/default/u-boot

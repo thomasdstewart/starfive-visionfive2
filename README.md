@@ -1,8 +1,8 @@
-# Starfive Visionfive2 Debian Image builder
+# Starfive Visionfive2 Debian Image Builder
 
-This is a quick way to build a sd card image for a Starfive Visionfive 2 board. The idea it to keep it as simple as possible. It uses vmdb2 to build an image from vanilla Debian, eg you can be sure of provenance, rather than getting an image from a random google drive. Details on the build can be seen in visionfive2.yaml. Obviously because of this some of the hardware might not function, but serial console and ethernet works which fill my usecase.
+This is a quick way to build an sd card image for a Starfive Visionfive 2 board. The idea it to keep it as simple as possible. It uses vmdb2 to build a vanilla Debian image, eg you can be sure of provenance, rather than getting an image from a random google drive. The only things not from official Debian mirrors is the kernel and firmware. Some of the hardware might not function, but serial console and ethernet works which is all I need. Details on the build can be seen in visionfive2.yaml.
 
-It assumes that the board already has opensbi and u-boot on the SPI storage and the board is configured to boot from SPI with vanilla settings. However v2.11.5 is copied from https://github.com/starfive-tech/VisionFive2/releases/ and are stored in /boot/fw to allow updating:
+It assumes that the board already has the opensbi and u-boot firmware on the SPI storage and the board is configured to boot from SPI with vanilla settings. The v2.11.5 firmware from https://github.com/starfive-tech/VisionFive2/releases/ is stored in /boot/fw for convenience. The move from v2.10.4 to v2.11.5 increased the size of mtd0, which either means updating firmware from u-boot via tftp or runner an kernel with the updated dtd. Full instructions for updating firmeware are here: https://doc-en.rvspace.org/VisionFive2/Quick_Start_Guide/VisionFive2_SDK_QSG/updating_spl_and_u_boot%20-%20vf2.html the short version is too flashcp commands:
 
 ```
 cd /boot
@@ -10,9 +10,8 @@ flashcp -v u-boot-spl.bin.normal.out /dev/mtd0
 flashcp -v visionfive2_fw_payload.img  /dev/mtd1
 ```
 
-The move from v2.10.4 to v2.11.5 where mtd0 increased in size required me to perform firmware update in uboot via sftp following https://doc-en.rvspace.org/VisionFive2/Quick_Start_Guide/VisionFive2_SDK_QSG/updating_spl_and_u_boot%20-%20vf2.html
-
-The kernel is from https://github.com/starfive-tech/linux/ and is compiled on 28th March 2023 (https://github.com/starfive-tech/linux/tree/a87c6861c6d96621026ee53b94f081a1a00a4cc7 tag: VF2_v2.11.5) with starfive instructions using the deb-pkg to create a deb, the resultant kernel deb is in this repo and is installed during the vmdb2 run. This was done with:
+The kernel is from https://github.com/starfive-tech/linux/ and was compiled from [a87c686](https://github.com/starfive-tech/linux/tree/a87c6861c6d96621026ee53b94f081a1a00a4cc7) tag: VF2_v2.11.5) on 28th March 2023
+using starfive instructions and the deb-pkg target. The resultant kernel deb is in this repo and is installed during the vmdb2 run.
 
 ```
 git clone git@github.com:starfive-tech/linux.git -b JH7110_VisionFive2_devel
