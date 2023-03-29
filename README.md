@@ -1,5 +1,7 @@
 # Starfive Visionfive2 Debian Image Builder
 
+(This is currently broken, the kernel upgrade from Jan to March broke something, and the resultant image lands in emergency mode)
+
 This is a quick way to build an sd card image for a Starfive Visionfive 2 board. The idea it to keep it as simple as possible. It uses vmdb2 to build a vanilla Debian image, eg you can be sure of provenance, rather than getting an image from a random google drive. The only things not from official Debian mirrors is the kernel and firmware. Some of the hardware might not function, but serial console and ethernet works which is all I need. Details on the build can be seen in visionfive2.yaml.
 
 It assumes that the board already has the opensbi and u-boot firmware on the SPI storage and the board is configured to boot from SPI with vanilla settings. The v2.11.5 firmware from https://github.com/starfive-tech/VisionFive2/releases/ is stored in /boot/fw for convenience. The move from v2.10.4 to v2.11.5 increased the size of mtd0, which either means updating firmware from u-boot via tftp or runner an kernel with the updated dtd. Full instructions for updating firmeware are here: https://doc-en.rvspace.org/VisionFive2/Quick_Start_Guide/VisionFive2_SDK_QSG/updating_spl_and_u_boot%20-%20vf2.html the short version is too flashcp commands:
@@ -77,7 +79,8 @@ All went fine.
 
 The resultant img can then be copied to an sd card
 ```
-~/src/starfive-visionfive2 $ ls -la visionfive2.img 
+$ ls -la visionfive2.img 
 -rw-r--r-- 1 root root 1000M Feb  7 10:05 visionfive2.img
-~/src/starfive-visionfive2 $
+$ sudo dd bs=1M if=visionfive2.img of=/dev/sdA
+$ sudo parted /dev/sdA
 ```
